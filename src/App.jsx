@@ -712,7 +712,7 @@ export default function App() {
                   step={idx + 1}
                   active={stage.key === currentStage}
                   done={idx < stageIndex}
-                  locked={false}
+                  locked={idx > stageIndex}
                   onClick={() => setCurrentStage(stage.key)}
                 />
               ))}
