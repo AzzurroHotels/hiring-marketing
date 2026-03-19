@@ -907,7 +907,6 @@ export default function App() {
                         <li><strong>Email:</strong> {form.email || '-'}</li>
                         <li><strong>WhatsApp:</strong> {form.whatsapp ? `${form.whatsappCountryCode} ${form.whatsapp}` : '-'}</li>
                         <li><strong>Working from:</strong> {form.location || '-'}</li>
-                        <li><strong>Questions for Lisa:</strong> {form.questionsForLisa || '-'}</li>
                       </ul>
                     </Card>
 
