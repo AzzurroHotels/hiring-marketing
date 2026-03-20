@@ -17,6 +17,49 @@ function Metric({ label, value, hint }) {
 
 const STATUS_OPTIONS = ['Submitted', 'In Review', 'Shortlisted', 'Flagged', 'Rejected', 'Hired'];
 
+const EMPTY_VIDEOS = ['', '', '', '', ''];
+
+function Screening2VideosTab() {
+  const saved = localStorage.getItem('screening2_videos');
+  const [videos, setVideos] = useState(saved ? JSON.parse(saved) : [...EMPTY_VIDEOS]);
+  const [saved2, setSaved2] = useState(false);
+
+  function save() {
+    localStorage.setItem('screening2_videos', JSON.stringify(videos));
+    setSaved2(true);
+    setTimeout(() => setSaved2(false), 2000);
+  }
+
+  return (
+    <Card>
+      <h2>Screening 2 — Videos for Candidates</h2>
+      <p className="muted" style={{ marginBottom: '1.5rem' }}>
+        Enter up to 5 video URLs (YouTube, Loom, etc.). Candidates will see these as clickable links on the Screening 2 page.
+      </p>
+      <div className="stack">
+        {videos.map((url, i) => (
+          <label key={i} className="field">
+            <span className="field-label">Video {i + 1}</span>
+            <input
+              type="url"
+              placeholder="https://www.youtube.com/watch?v=..."
+              value={url}
+              onChange={(e) => {
+                const next = [...videos];
+                next[i] = e.target.value;
+                setVideos(next);
+              }}
+            />
+          </label>
+        ))}
+        <button className="primary" type="button" onClick={save} style={{ alignSelf: 'flex-start' }}>
+          {saved2 ? '✓ Saved!' : 'Save Videos'}
+        </button>
+      </div>
+    </Card>
+  );
+}
+
 export default function AdminPanel() {
   const [password, setPassword] = useState('');
   const [authed, setAuthed] = useState(false);
@@ -148,6 +191,9 @@ export default function AdminPanel() {
           <button className={`pill ${tab === 'sessions' ? 'pill-active' : ''}`} onClick={() => setTab('sessions')}>
             Started Sessions ({sessions.length})
           </button>
+          <button className={`pill ${tab === 'videos' ? 'pill-active' : ''}`} onClick={() => setTab('videos')}>
+            Screening 2 Videos
+          </button>
           <button className="pill" onClick={loadData}>Refresh</button>
           <button className="pill" onClick={() => { setAuthed(false); setPassword(''); }}>Log out</button>
         </div>
@@ -238,6 +284,8 @@ export default function AdminPanel() {
           )}
         </Card>
       )}
+
+      {tab === 'videos' && <Screening2VideosTab />}
 
       {tab === 'sessions' && (
         <Card>

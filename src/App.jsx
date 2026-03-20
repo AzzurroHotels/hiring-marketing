@@ -142,10 +142,10 @@ const REQUIRED_SCREENING2_FILES = ['testVideo1File'];
 
 
 const SOCIAL_QUESTIONS = [
-  { key: 'socialUsage',         label: 'How often do you use social media?',                type: 'text' },
-  { key: 'currentTrends',       label: 'What are current trends on TikTok and Instagram?',  type: 'text' },
-  { key: 'favoriteInfluencer',  label: 'Who is your favorite influencer?',                  type: 'text' },
-  { key: 'influencerReason',    label: 'Why is this your favorite influencer?',             type: 'text' },
+  { key: 'socialUsage',         label: 'How often do you use social media?' },
+  { key: 'currentTrends',       label: 'What are current trends on TikTok and Instagram?' },
+  { key: 'favoriteInfluencer',  label: 'Who is your favorite influencer?' },
+  { key: 'influencerReason',    label: 'Why is this your favorite influencer?' },
 ];
 
 const SCREENING2_VOICE_QUESTIONS = [
@@ -840,6 +840,25 @@ export default function App() {
                   <h2>Screening 2 — Content Creation Test</h2>
                   <p className="muted">The candidate submits an initial edit, then a revised version after watching guidance materials.</p>
                 </div>
+
+                {(() => {
+                  const saved = localStorage.getItem('screening2_videos');
+                  const videos = saved ? JSON.parse(saved).filter(Boolean) : [];
+                  return videos.length > 0 ? (
+                    <div>
+                      <h3>Videos to Review</h3>
+                      <p className="muted">Watch all videos before answering the questions below.</p>
+                      <div className="resource-grid" style={{ marginTop: '12px' }}>
+                        {videos.map((url, i) => (
+                          <a key={i} href={url} className="resource" target="_blank" rel="noreferrer">
+                            <strong>Video {i + 1}</strong>
+                            <span>Open video</span>
+                          </a>
+                        ))}
+                      </div>
+                    </div>
+                  ) : null;
+                })()}
 
                 <div>
                   <h3>Video Review Questions</h3>
