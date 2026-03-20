@@ -841,24 +841,22 @@ export default function App() {
                   <p className="muted">The candidate submits an initial edit, then a revised version after watching guidance materials.</p>
                 </div>
 
-                {(() => {
-                  const saved = localStorage.getItem('screening2_videos');
-                  const videos = saved ? JSON.parse(saved).filter(Boolean) : [];
-                  return videos.length > 0 ? (
-                    <div>
-                      <h3>Videos to Review</h3>
-                      <p className="muted">Watch all videos before answering the questions below.</p>
-                      <div className="resource-grid" style={{ marginTop: '12px' }}>
-                        {videos.map((url, i) => (
-                          <a key={i} href={url} className="resource" target="_blank" rel="noreferrer">
-                            <strong>Video {i + 1}</strong>
-                            <span>Open video</span>
-                          </a>
-                        ))}
+                <div>
+                  <h3>Videos to Review</h3>
+                  <p className="muted">Watch all 5 videos before answering the questions below.</p>
+                  <div className="stack" style={{ marginTop: '12px', gap: '16px' }}>
+                    {[1,2,3,4,5].map((n) => (
+                      <div key={n}>
+                        <div className="muted" style={{ fontSize: '13px', fontWeight: 600, marginBottom: '6px' }}>Video {n}</div>
+                        <video
+                          controls
+                          style={{ width: '100%', borderRadius: '16px', background: '#000' }}
+                          src={`/videos/video${n}.mp4`}
+                        />
                       </div>
-                    </div>
-                  ) : null;
-                })()}
+                    ))}
+                  </div>
+                </div>
 
                 <div>
                   <h3>Video Review Questions</h3>
