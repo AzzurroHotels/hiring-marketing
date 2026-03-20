@@ -146,6 +146,9 @@ const SOCIAL_QUESTIONS = [
   { key: 'currentTrends',       label: 'What are current trends on TikTok and Instagram?',  type: 'text' },
   { key: 'favoriteInfluencer',  label: 'Who is your favorite influencer?',                  type: 'text' },
   { key: 'influencerReason',    label: 'Why is this your favorite influencer?',             type: 'text' },
+];
+
+const SCREENING2_VOICE_QUESTIONS = [
   { key: 'rankingNotes',        label: 'Watch 5 videos and rank them by virality' },
   { key: 'bestPerformingVideo', label: 'Which one will perform best?' },
   { key: 'bestVideoWhy',        label: 'Why will it perform best?' },
@@ -851,8 +854,17 @@ export default function App() {
                     />
                     <Input label="What did you focus on in your first video?" required textarea rows="5" value={form.focusNotes} onChange={(e) => setField('focusNotes', e.target.value)} />
                   </Card>
-
                 </div>
+
+                <div>
+                  <h3>Video Review Questions</h3>
+                  <p className="muted">Record your answers to each question about the videos below.</p>
+                </div>
+                <VoiceQuiz
+                  questions={SCREENING2_VOICE_QUESTIONS}
+                  voiceAnswers={voiceAnswers}
+                  onSave={(key, blob, url, text) => setVoiceAnswers((prev) => ({ ...prev, [key]: text !== undefined ? { text } : { blob, url } }))}
+                />
               </section>
             )}
 
