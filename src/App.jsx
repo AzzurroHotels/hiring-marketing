@@ -142,10 +142,10 @@ const REQUIRED_SCREENING2_FILES = ['testVideo1File'];
 
 
 const SOCIAL_QUESTIONS = [
-  { key: 'socialUsage',         label: 'How often do you use social media?' },
-  { key: 'currentTrends',       label: 'What are current trends on TikTok and Instagram?' },
-  { key: 'favoriteInfluencer',  label: 'Who is your favorite influencer?' },
-  { key: 'influencerReason',    label: 'Why is this your favorite influencer?' },
+  { key: 'socialUsage',         label: 'How often do you use social media?',                type: 'text' },
+  { key: 'currentTrends',       label: 'What are current trends on TikTok and Instagram?',  type: 'text' },
+  { key: 'favoriteInfluencer',  label: 'Who is your favorite influencer?',                  type: 'text' },
+  { key: 'influencerReason',    label: 'Why is this your favorite influencer?',             type: 'text' },
   { key: 'rankingNotes',        label: 'Watch 5 videos and rank them by virality' },
   { key: 'bestPerformingVideo', label: 'Which one will perform best?' },
   { key: 'bestVideoWhy',        label: 'Why will it perform best?' },
@@ -385,11 +385,21 @@ function VoiceQuiz({ questions, voiceAnswers, onSave }) {
       <div className={`vq-question ${visible ? 'vq-visible' : 'vq-hidden'}`}>
         <div className="vq-step">Question {idx + 1} of {questions.length}</div>
         <h3 className="vq-label">{q.label}</h3>
-        <VoiceRecorder
-          key={q.key}
-          savedUrl={voiceAnswers[q.key]?.url || null}
-          onSubmit={(blob, url) => onSave(q.key, blob, url)}
-        />
+        {q.type === 'text' ? (
+          <textarea
+            className="vq-textarea"
+            rows={4}
+            placeholder="Type your answer here…"
+            value={voiceAnswers[q.key]?.text || ''}
+            onChange={(e) => onSave(q.key, null, null, e.target.value)}
+          />
+        ) : (
+          <VoiceRecorder
+            key={q.key}
+            savedUrl={voiceAnswers[q.key]?.url || null}
+            onSubmit={(blob, url) => onSave(q.key, blob, url)}
+          />
+        )}
       </div>
 
       <div className="vq-footer">
@@ -712,7 +722,7 @@ export default function App() {
                   step={idx + 1}
                   active={stage.key === currentStage}
                   done={idx < stageIndex}
-                  locked={idx > stageIndex}
+                  locked={false}
                   onClick={() => setCurrentStage(stage.key)}
                 />
               ))}
@@ -816,7 +826,7 @@ export default function App() {
                 <VoiceQuiz
                   questions={SOCIAL_QUESTIONS}
                   voiceAnswers={voiceAnswers}
-                  onSave={(key, blob, url) => setVoiceAnswers((prev) => ({ ...prev, [key]: { blob, url } }))}
+                  onSave={(key, blob, url, text) => setVoiceAnswers((prev) => ({ ...prev, [key]: text !== undefined ? { text } : { blob, url } }))}
                 />
               </section>
             )}
