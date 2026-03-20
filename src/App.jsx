@@ -841,6 +841,16 @@ export default function App() {
                   <p className="muted">The candidate submits an initial edit, then a revised version after watching guidance materials.</p>
                 </div>
 
+                <div>
+                  <h3>Video Review Questions</h3>
+                  <p className="muted">Record your answers to each question about the videos below.</p>
+                </div>
+                <VoiceQuiz
+                  questions={SCREENING2_VOICE_QUESTIONS}
+                  voiceAnswers={voiceAnswers}
+                  onSave={(key, blob, url, text) => setVoiceAnswers((prev) => ({ ...prev, [key]: text !== undefined ? { text } : { blob, url } }))}
+                />
+
                 <div className="grid-one">
                   <Card className="subcard">
                     <h3>Video Creation Test 1</h3>
@@ -855,16 +865,6 @@ export default function App() {
                     <Input label="What did you focus on in your first video?" required textarea rows="5" value={form.focusNotes} onChange={(e) => setField('focusNotes', e.target.value)} />
                   </Card>
                 </div>
-
-                <div>
-                  <h3>Video Review Questions</h3>
-                  <p className="muted">Record your answers to each question about the videos below.</p>
-                </div>
-                <VoiceQuiz
-                  questions={SCREENING2_VOICE_QUESTIONS}
-                  voiceAnswers={voiceAnswers}
-                  onSave={(key, blob, url, text) => setVoiceAnswers((prev) => ({ ...prev, [key]: text !== undefined ? { text } : { blob, url } }))}
-                />
               </section>
             )}
 
