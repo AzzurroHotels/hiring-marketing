@@ -21,7 +21,8 @@ jobs:
             APP_DIR=/root/hiring-marketing
 
             # Clone if first deploy, otherwise pull
-            if [ ! -d "$APP_DIR" ]; then
+            if [ ! -d "$APP_DIR/.git" ]; then
+              rm -rf "$APP_DIR"
               git clone https://github.com/AzzurroHotels/hiring-marketing.git "$APP_DIR"
             fi
 
