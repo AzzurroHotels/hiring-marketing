@@ -162,6 +162,7 @@ const REQUIRED_SCREENING2_FIELDS = ['focusNotes'];
 const REQUIRED_SCREENING2_FILES = ['testVideo1File'];
 
 
+
 const SOCIAL_QUESTIONS = [
   { key: 'socialUsage',         label: 'How often do you use social media?' },
   { key: 'currentTrends',       label: 'What are current trends on TikTok and Instagram?' },
@@ -169,11 +170,15 @@ const SOCIAL_QUESTIONS = [
   { key: 'influencerReason',    label: 'Why is this your favorite influencer?' },
 ];
 
+const REQUIRED_SOCIAL_VOICE_KEYS = SOCIAL_QUESTIONS.map(q => q.key);
+const REQUIRED_TRIAL_FIELDS = ['remakeChanges'];
+const REQUIRED_TRIAL_FILES = ['testVideo2File'];
+
 const SCREENING2_VOICE_QUESTIONS = [
-  { key: 'rankingNotes',        label: 'Watch 5 videos and rank them by virality' },
-  { key: 'bestPerformingVideo', label: 'Which one will perform best?' },
-  { key: 'bestVideoWhy',        label: 'Why will it perform best?' },
-  { key: 'whatWouldYouChange',  label: 'What would you change?' },
+  { key: 'rankingNotes',        label: 'Watch 5 videos and rank them by virality', type: 'text' },
+  { key: 'bestPerformingVideo', label: 'Which one will perform best?', type: 'text' },
+  { key: 'bestVideoWhy',        label: 'Why will it perform best?', type: 'text' },
+  { key: 'whatWouldYouChange',  label: 'What would you change?', type: 'text' },
 ];
 
 const initialForm = {
@@ -553,6 +558,7 @@ export default function App() {
   const [voiceAnswers, setVoiceAnswers] = useState({});
   const [submitState, setSubmitState] = useState({ loading: false, success: false, error: '' });
   const [validationError, setValidationError] = useState('');
+  const [completedStages, setCompletedStages] = useState(new Set());
 
   // Session tracking
   const [started, setStarted] = useState(false);
@@ -611,6 +617,11 @@ export default function App() {
         return 'Please fill in all required fields (marked with *).';
     }
 
+    if (currentStage === 'social') {
+      const missing = REQUIRED_SOCIAL_VOICE_KEYS.filter((k) => !voiceAnswers[k]);
+      if (missing.length) return 'Please answer all social fit questions before continuing.';
+    }
+
     if (currentStage === 'screening2') {
       const missing = REQUIRED_SCREENING2_FIELDS.filter((f) => !form[f]?.trim());
       const missingFiles = REQUIRED_SCREENING2_FILES.filter((f) => !files[f]);
@@ -618,6 +629,12 @@ export default function App() {
         return 'Please fill in all required fields and upload both video tests.';
     }
 
+    if (currentStage === 'trial') {
+      const missing = REQUIRED_TRIAL_FIELDS.filter((f) => !form[f]?.trim());
+      const missingFiles = REQUIRED_TRIAL_FILES.filter((f) => !files[f]);
+      if (missing.length || missingFiles.length)
+        return 'Please watch the resources, upload Video Test 2, and explain your changes.';
+    }
 
     return null;
   }
@@ -653,7 +670,8 @@ export default function App() {
       });
     }
 
-    // Move to next stage
+    // Mark current stage as completed and move to next stage
+    setCompletedStages((prev) => new Set([...prev, currentStage]));
     if (stageIndex < STAGES.length - 1) {
       setCurrentStage(STAGES[stageIndex + 1].key);
     }
@@ -739,17 +757,22 @@ export default function App() {
             </div>
 
             <div className="stage-list">
-              {STAGES.map((stage, idx) => (
-                <StageLink
-                  key={stage.key}
-                  title={stage.title}
-                  step={idx + 1}
-                  active={stage.key === currentStage}
-                  done={idx < stageIndex}
-                  locked={false}
-                  onClick={() => setCurrentStage(stage.key)}
-                />
-              ))}
+              {STAGES.map((stage, idx) => {
+                const isCompleted = completedStages.has(stage.key);
+                const allPreviousCompleted = STAGES.slice(0, idx).every((s) => completedStages.has(s.key));
+                const isLocked = idx > 0 && !allPreviousCompleted && !isCompleted;
+                return (
+                  <StageLink
+                    key={stage.key}
+                    title={stage.title}
+                    step={idx + 1}
+                    active={stage.key === currentStage}
+                    done={isCompleted}
+                    locked={isLocked}
+                    onClick={() => setCurrentStage(stage.key)}
+                  />
+                );
+              })}
             </div>
 
           </Card>
