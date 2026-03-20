@@ -857,12 +857,6 @@ export default function App() {
                       <SpeedTest onResult={(mbps) => setField('internetMbps', mbps)} />
                       <Checkbox label="Headphones with microphone available" checked={form.headphones} onChange={(v) => setField('headphones', v)} />
                       <Checkbox label="Mouse available" checked={form.mouse} onChange={(v) => setField('mouse', v)} />
-                      <FileInput
-                        label="Upload device photo"
-                        helper="Optional phone or second-device image"
-                        selectedName={files.devicePhotoFile?.name}
-                        onChange={(file) => setFiles((prev) => ({ ...prev, devicePhotoFile: file }))}
-                      />
                     </div>
                   </Card>
                 </div>
