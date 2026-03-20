@@ -2,6 +2,27 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { APP_CONFIG } from './config';
 
+const SCREENING2_VIDEOS = [
+  { id: 1, src: '/videos/video1.mp4', score: 1 },
+  { id: 2, src: '/videos/video2.mp4', score: 2 },
+  { id: 3, src: '/videos/video3.mp4', score: 4 },
+  { id: 4, src: '/videos/video4.mp4', score: 1 },
+  { id: 5, src: '/videos/video5.mp4', score: 2 },
+];
+
+// Seeded shuffle — same email always gets the same order
+function seededShuffle(arr, seed) {
+  let s = [...arr];
+  let h = 0;
+  for (let i = 0; i < seed.length; i++) h = (Math.imul(31, h) + seed.charCodeAt(i)) | 0;
+  for (let i = s.length - 1; i > 0; i--) {
+    h = (Math.imul(h ^ (h >>> 16), 0x45d9f3b)) | 0;
+    const j = Math.abs(h) % (i + 1);
+    [s[i], s[j]] = [s[j], s[i]];
+  }
+  return s;
+}
+
 const STAGES = [
   { key: 'profile', title: 'Profile' },
   { key: 'screening1', title: 'Screening 1' },
@@ -841,22 +862,27 @@ export default function App() {
                   <p className="muted">The candidate submits an initial edit, then a revised version after watching guidance materials.</p>
                 </div>
 
-                <div>
-                  <h3>Videos to Review</h3>
-                  <p className="muted">Watch all 5 videos before answering the questions below.</p>
-                  <div className="stack" style={{ marginTop: '12px', gap: '16px' }}>
-                    {[1,2,3,4,5].map((n) => (
-                      <div key={n}>
-                        <div className="muted" style={{ fontSize: '13px', fontWeight: 600, marginBottom: '6px' }}>Video {n}</div>
-                        <video
-                          controls
-                          style={{ width: '100%', borderRadius: '16px', background: '#000' }}
-                          src={`/videos/video${n}.mp4`}
-                        />
+                {(() => {
+                  const shuffled = seededShuffle(SCREENING2_VIDEOS, form.email || 'default');
+                  return (
+                    <div>
+                      <h3>Videos to Review</h3>
+                      <p className="muted">Watch all 5 videos, then rank them by virality in your answer below.</p>
+                      <div className="stack" style={{ marginTop: '12px', gap: '16px' }}>
+                        {shuffled.map((v, i) => (
+                          <div key={v.id}>
+                            <div className="muted" style={{ fontSize: '13px', fontWeight: 600, marginBottom: '6px' }}>Video {i + 1}</div>
+                            <video
+                              controls
+                              style={{ width: '100%', borderRadius: '16px', background: '#000' }}
+                              src={v.src}
+                            />
+                          </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
-                </div>
+                    </div>
+                  );
+                })()}
 
                 <div>
                   <h3>Video Review Questions</h3>

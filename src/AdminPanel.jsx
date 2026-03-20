@@ -17,48 +17,44 @@ function Metric({ label, value, hint }) {
 
 const STATUS_OPTIONS = ['Submitted', 'In Review', 'Shortlisted', 'Flagged', 'Rejected', 'Hired'];
 
-const EMPTY_VIDEOS = ['', '', '', '', ''];
+const SCREENING2_VIDEOS = [
+  { id: 1, score: 1 },
+  { id: 2, score: 2 },
+  { id: 3, score: 4 },
+  { id: 4, score: 1 },
+  { id: 5, score: 2 },
+];
 
-function Screening2VideosTab() {
-  const saved = localStorage.getItem('screening2_videos');
-  const [videos, setVideos] = useState(saved ? JSON.parse(saved) : [...EMPTY_VIDEOS]);
-  const [saved2, setSaved2] = useState(false);
-
-  function save() {
-    localStorage.setItem('screening2_videos', JSON.stringify(videos));
-    setSaved2(true);
-    setTimeout(() => setSaved2(false), 2000);
+function seededShuffle(arr, seed) {
+  let s = [...arr];
+  let h = 0;
+  for (let i = 0; i < seed.length; i++) h = (Math.imul(31, h) + seed.charCodeAt(i)) | 0;
+  for (let i = s.length - 1; i > 0; i--) {
+    h = (Math.imul(h ^ (h >>> 16), 0x45d9f3b)) | 0;
+    const j = Math.abs(h) % (i + 1);
+    [s[i], s[j]] = [s[j], s[i]];
   }
+  return s;
+}
 
+function CandidateVideoOrder({ email }) {
+  const shuffled = seededShuffle(SCREENING2_VIDEOS, email || 'default');
+  const correct = [...shuffled].sort((a, b) => b.score - a.score);
   return (
-    <Card>
-      <h2>Screening 2 — Videos for Candidates</h2>
-      <p className="muted" style={{ marginBottom: '1.5rem' }}>
-        Enter up to 5 video URLs (YouTube, Loom, etc.). Candidates will see these as clickable links on the Screening 2 page.
-      </p>
-      <div className="stack">
-        {videos.map((url, i) => (
-          <label key={i} className="field">
-            <span className="field-label">Video {i + 1}</span>
-            <input
-              type="url"
-              placeholder="https://www.youtube.com/watch?v=..."
-              value={url}
-              onChange={(e) => {
-                const next = [...videos];
-                next[i] = e.target.value;
-                setVideos(next);
-              }}
-            />
-          </label>
-        ))}
-        <button className="primary" type="button" onClick={save} style={{ alignSelf: 'flex-start' }}>
-          {saved2 ? '✓ Saved!' : 'Save Videos'}
-        </button>
-      </div>
-    </Card>
+    <div style={{ marginTop: '0.5rem', fontSize: '0.8rem' }}>
+      <strong>Screening 2 video order shown:</strong>{' '}
+      {shuffled.map((v, i) => (
+        <span key={v.id}>Video {v.id} (score {v.score}){i < shuffled.length - 1 ? ' → ' : ''}</span>
+      ))}
+      <br />
+      <strong>Correct ranking (high→low):</strong>{' '}
+      {correct.map((v, i) => (
+        <span key={v.id}>Video {v.id} (score {v.score}){i < correct.length - 1 ? ' → ' : ''}</span>
+      ))}
+    </div>
   );
 }
+
 
 export default function AdminPanel() {
   const [password, setPassword] = useState('');
@@ -191,9 +187,6 @@ export default function AdminPanel() {
           <button className={`pill ${tab === 'sessions' ? 'pill-active' : ''}`} onClick={() => setTab('sessions')}>
             Started Sessions ({sessions.length})
           </button>
-          <button className={`pill ${tab === 'videos' ? 'pill-active' : ''}`} onClick={() => setTab('videos')}>
-            Screening 2 Videos
-          </button>
           <button className="pill" onClick={loadData}>Refresh</button>
           <button className="pill" onClick={() => { setAuthed(false); setPassword(''); }}>Log out</button>
         </div>
@@ -270,6 +263,7 @@ export default function AdminPanel() {
                       <div><strong>Current trends:</strong> {expandedPayload.currentTrends || '-'}</div>
                       <div><strong>Favorite influencer:</strong> {expandedPayload.favoriteInfluencer || '-'} — {expandedPayload.influencerReason || '-'}</div>
                       <div><strong>Ranking notes:</strong> {expandedPayload.rankingNotes || '-'}</div>
+                      <CandidateVideoOrder email={c.email} />
                       <div><strong>Best performing video:</strong> {expandedPayload.bestPerformingVideo || '-'}</div>
                       <div><strong>Why:</strong> {expandedPayload.bestVideoWhy || '-'}</div>
                       <div><strong>What would you change:</strong> {expandedPayload.whatWouldYouChange || '-'}</div>
@@ -284,8 +278,6 @@ export default function AdminPanel() {
           )}
         </Card>
       )}
-
-      {tab === 'videos' && <Screening2VideosTab />}
 
       {tab === 'sessions' && (
         <Card>
