@@ -1,0 +1,44 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          password: ${{ secrets.VPS_PASSWORD }}
+          script: |
+            set -e
+
+            APP_DIR=/root/hiring-marketing
+
+            # Clone if first deploy, otherwise pull
+            if [ ! -d "$APP_DIR" ]; then
+              git clone https://github.com/AzzurroHotels/hiring-marketing.git "$APP_DIR"
+            fi
+
+            cd "$APP_DIR"
+            git fetch origin main
+            git reset --hard origin/main
+
+            # Install dependencies
+            npm ci --production=false
+
+            # Build frontend
+            npm run build
+
+            # Restart server with PM2
+            if pm2 describe hiring-marketing > /dev/null 2>&1; then
+              pm2 restart hiring-marketing
+            else
+              pm2 start server/index.js --name hiring-marketing
+            fi
+            pm2 save
