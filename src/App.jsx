@@ -28,6 +28,7 @@ const STAGES = [
   { key: 'screening1', title: 'Screening 1' },
   { key: 'social', title: 'Social Fit' },
   { key: 'screening2', title: 'Screening 2' },
+  { key: 'videotest1', title: 'Video Test 1' },
   { key: 'trial', title: 'Trial' },
   { key: 'review', title: 'Review & Submit' },
 ];
@@ -623,10 +624,15 @@ export default function App() {
     }
 
     if (currentStage === 'screening2') {
+      const missingAnswers = SCREENING2_VOICE_QUESTIONS.filter((q) => !voiceAnswers[q.key]?.text?.trim());
+      if (missingAnswers.length) return 'Please answer all video review questions before continuing.';
+    }
+
+    if (currentStage === 'videotest1') {
       const missing = REQUIRED_SCREENING2_FIELDS.filter((f) => !form[f]?.trim());
       const missingFiles = REQUIRED_SCREENING2_FILES.filter((f) => !files[f]);
       if (missing.length || missingFiles.length)
-        return 'Please fill in all required fields and upload both video tests.';
+        return 'Please upload your video and describe what you focused on.';
     }
 
     if (currentStage === 'trial') {
@@ -891,13 +897,13 @@ export default function App() {
                     <div>
                       <h3>Videos to Review</h3>
                       <p className="muted">Watch all 5 videos, then rank them by virality in your answer below.</p>
-                      <div className="stack" style={{ marginTop: '12px', gap: '16px' }}>
+                      <div className="screening2-videos">
                         {shuffled.map((v, i) => (
-                          <div key={v.id}>
+                          <div key={v.id} className="screening2-video-item">
                             <div className="muted" style={{ fontSize: '13px', fontWeight: 600, marginBottom: '6px' }}>Video {i + 1}</div>
                             <video
                               controls
-                              style={{ width: '100%', borderRadius: '16px', background: '#000' }}
+                              style={{ width: '100%', borderRadius: '12px', background: '#000' }}
                               src={v.src}
                             />
                           </div>
@@ -909,28 +915,41 @@ export default function App() {
 
                 <div>
                   <h3>Video Review Questions</h3>
-                  <p className="muted">Record your answers to each question about the videos below.</p>
+                  <p className="muted">Answer each question about the videos below.</p>
                 </div>
-                <VoiceQuiz
-                  questions={SCREENING2_VOICE_QUESTIONS}
-                  voiceAnswers={voiceAnswers}
-                  onSave={(key, blob, url, text) => setVoiceAnswers((prev) => ({ ...prev, [key]: text !== undefined ? { text } : { blob, url } }))}
-                />
+                <div className="screening2-questions">
+                  {SCREENING2_VOICE_QUESTIONS.map((q) => (
+                    <label key={q.key} className="field">
+                      <span className="field-label">{q.label}</span>
+                      <textarea
+                        rows={3}
+                        placeholder="Type your answer here…"
+                        value={voiceAnswers[q.key]?.text || ''}
+                        onChange={(e) => setVoiceAnswers((prev) => ({ ...prev, [q.key]: { text: e.target.value } }))}
+                      />
+                    </label>
+                  ))}
+                </div>
 
-                <div className="grid-one">
-                  <Card className="subcard">
-                    <h3>Video Creation Test 1</h3>
-                    <p className="muted">HR provides sample files. Candidate creates one short-form video.</p>
-                    <FileInput
-                      label="Upload Video Test 1"
-                      required
-                      helper="MP4, MOV, or any export file"
-                      selectedName={files.testVideo1File?.name}
-                      onChange={(file) => setFiles((prev) => ({ ...prev, testVideo1File: file }))}
-                    />
-                    <Input label="What did you focus on in your first video?" required textarea rows="5" value={form.focusNotes} onChange={(e) => setField('focusNotes', e.target.value)} />
-                  </Card>
+              </section>
+            )}
+
+            {currentStage === 'videotest1' && (
+              <section className="stack">
+                <div>
+                  <h2>Video Creation Test 1</h2>
+                  <p className="muted">HR provides sample files. Create one short-form video and describe your approach.</p>
                 </div>
+                <Card className="subcard">
+                  <FileInput
+                    label="Upload Video Test 1"
+                    required
+                    helper="MP4, MOV, or any export file"
+                    selectedName={files.testVideo1File?.name}
+                    onChange={(file) => setFiles((prev) => ({ ...prev, testVideo1File: file }))}
+                  />
+                  <Input label="What did you focus on in your first video?" required textarea rows="5" value={form.focusNotes} onChange={(e) => setField('focusNotes', e.target.value)} />
+                </Card>
               </section>
             )}
 
